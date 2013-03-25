@@ -1109,7 +1109,7 @@ void imRecordTime (MYSQL* conn, Project project, Phase phase) {
 }
 
 int testMain () {
-	MYSQL* conn = dbConnectDefaultDatabase ("kevin", "09011992!");
+	MYSQL* conn = dbConnectDefaultDatabase ("root", "p@ssword");
 
 	Project project;
 	project.userProjectId = 1;
