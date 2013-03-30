@@ -1139,6 +1139,370 @@ int testMain () {
 	return 0;
 }
 
+/**TEST REPORT TEMPLATE**/
+
+typedef char string1000[1001];
+typedef char string500[501];
+typedef char string300[301];
+typedef char string100[101];
+typedef char string50 [51];
+typedef char string20[21];
+
+typedef struct{
+	int testNumber;
+	int userProjectId;
+	string300 testObjective;
+	string300 testConditions;
+	string300 expectedResults;
+	string300 actualResults;
+	string300 testDescription;
+}TestReport;
+
+struct trtTable {
+	string50 tableName;
+	string20 testNumber;
+	string20 userProjectId;
+	string500 testObjective;
+	string500 testConditions;
+	string500 expectedResults;
+	string500 actualResults;
+	string500 testDescription;
+};
+
+const struct trtTable TrtTable = {
+	"testreport",
+	"test_number",
+	"user_project_id",
+	"test_objective",
+	"test_conditions",
+	"expected_results",
+	"actual_results",
+	"test_description"
+};
+
+int trtCountDetails(MYSQL* conn, string300 query){
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+	int count = 0;
+	string300 countQuery;
+	//strcpy(countQuery, NULL);
+	
+	sprintf(countQuery, "%s", query);
+	if(mysql_query(conn, countQuery) != 0){
+		printf("Error: Count Query Failed.");
+	}
+	else{
+		result = mysql_store_result(conn);
+		if(result == NULL){
+			utilPrintError(conn, "No count produced.");
+		}
+		else{
+			while((row = mysql_fetch_row(result))){
+				count = atoi(row[0]);
+			}
+		}
+	}
+	//strcpy(countQuery, NULL);
+	return count;
+}
+
+void trtConcatString(string300 query, int detail, int userProjectId, int testNum){
+	string100 query1;
+	//strcpy(query1, NULL);
+	string100 query2;
+	//strcpy(query2, NULL);
+	string100 query3;
+	//strcpy(query3, NULL);;
+	char projId[11];
+	//strcpy(projId, NULL);
+	char testNo[11];
+	//strcpy(testNo, NULL);
+	
+	sprintf(projId, "%d", userProjectId);
+	sprintf(testNo, "%d", testNum);
+	
+	strcpy(query2, "' AND test_number = '");
+	strcpy(query3, "';");
+	
+	switch(detail){
+		case 1:
+			strcpy(query1, "SELECT test_objective FROM testreport WHERE user_project_id='");
+			break;
+		case 2:
+			strcpy(query1, "SELECT test_description FROM testreport WHERE user_project_id='");
+			break;
+		case 3:
+			strcpy(query1, "SELECT expected_results FROM testreport WHERE user_project_id='");
+			break;
+		case 4:
+			strcpy(query1, "SELECT actual_results FROM testreport WHERE user_project_id='");
+			break;
+		case 5:
+			strcpy(query1, "SELECT * FROM testreport WHERE user_project_id='");
+			break;
+		case 6:
+			strcpy(query1, "SELECT COUNT(*) FROM testreport WHERE user_project_id='");
+			break;
+		case 7:
+			strcpy(query1, "SELECT COUNT(*) FROM testreport WHERE actual_results IS NULL AND user_project_id='");
+			break;
+	}
+	
+	strcat(query1, projId);
+	if(detail != 5 && detail != 6){	
+		strcat(query1, query2);
+		strcat(query1, testNo);	
+	}
+	strcat(query1, query3);
+	strcpy(query, query1);
+	
+	//strcpy(query1, NULL);
+	//strcpy(query2, NULL);
+	//strcpy(query3, NULL);
+	//strcpy(projId, NULL);
+	//strcpy(testNo, NULL);
+}
+
+void trtSelectDetails(MYSQL* conn, string300 query){
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+	int num_fields;
+	int i;
+	string300 selectQuery;
+	//strcpy(selectQuery, NULL);
+	
+	sprintf(selectQuery, "%s", query);
+	if(mysql_query(conn, selectQuery) != 0){
+		printf("Query failed \n");
+	}
+	else {
+		result = mysql_store_result(conn);
+		if(result == NULL){
+			utilPrintError(conn, "No matching results found.");
+		}
+		else {
+			num_fields = mysql_num_fields(result);
+			while((row = mysql_fetch_row(result))){
+				for(i = 0; i < num_fields; i++){
+					printf("%s ", row[i] ? row[i] : "NULL");
+				}
+				printf("\n");
+			}
+		}
+	}
+	//strcpy(selectQuery, NULL);
+}
+
+void trtDisplayReport(MYSQL* conn, int userProjectId, int testNum){
+	string300 query;
+	//strcpy(query, NULL);
+	
+	printf("Test Number: %d\n", testNum);
+	printf("Test Objective: ");
+	trtConcatString(query, 1, userProjectId, testNum);
+	trtSelectDetails(conn, query);
+	printf("Test Description: ");
+	trtConcatString(query, 2, userProjectId, testNum);
+	trtSelectDetails(conn, query);
+	printf("Expected Results: ");
+	trtConcatString(query, 3, userProjectId, testNum);
+	trtSelectDetails(conn, query);
+	printf("Actual Results: ");
+	trtConcatString(query, 4, userProjectId, testNum);
+	trtSelectDetails(conn, query);
+	
+	//strcpy(query, NULL);	
+}
+
+void trtDisplayAllReports(MYSQL* conn, int userProjectId){
+	string300 queryCount;
+	//strcpy(queryCount, NULL);
+	trtConcatString(queryCount, 6, userProjectId, 0);
+	int entryCount = trtCountDetails(conn, queryCount);
+	
+	CLEARSCR;
+	printf("Test Reports\n\n");
+	int i;
+	for(i = 1; i < entryCount + 1; i++){
+		trtDisplayReport(conn, userProjectId, i);
+		printf("\n");
+	}
+	getch();
+	//strcpy(queryCount, NULL);
+}
+
+int trtUpdateDetails(MYSQL* conn, string500 actualResults, int testNum){
+	string300 updateQuery;
+	//strcpy(updateQuery, NULL);
+	
+	sprintf(updateQuery, "UPDATE %s SET %s='%s' WHERE %s = %d",
+		TrtTable.tableName,
+		TrtTable.actualResults, actualResults,
+		TrtTable.testNumber, testNum);
+	if(mysql_query(conn, updateQuery) != 0){
+		//strcpy(updateQuery, NULL);
+		return 0;
+	}
+	else {
+		//strcpy(updateQuery, NULL);
+		return 1;
+	}
+}
+
+void trtInputActualResults(MYSQL* conn, int userProjectId){
+	string300 querySelect;
+	//strcpy(querySelect, NULL);
+	strcpy(querySelect, "SELECT test_number, test_description FROM testreport WHERE actual_results IS NULL;");
+	int choice;
+	int trans;
+	string500 actualResults;
+	//strcpy(actualResults, NULL);
+	int entryCount;
+	string300 queryCount;
+	//strcpy(queryCount, NULL);	
+	char ans, dump;
+	
+	do{
+		CLEARSCR;
+		printf("Add Actual Test Results\n\n");
+		trtSelectDetails(conn, querySelect);
+			
+		printf("\n\nChoose a test number: ");
+		scanf("%d%c", &choice, &dump);
+		
+		trtConcatString(queryCount, 7, userProjectId, choice);
+		entryCount = trtCountDetails(conn, queryCount);
+		
+		if(entryCount == 0){
+			printf("Invalid input, choose from test numbers listed above...");
+			getch();
+		}
+	} while(entryCount == 0);
+	
+	CLEARSCR;
+	trtDisplayReport(conn, userProjectId, choice);
+	printf("\n\nActual Results: ");
+	gets(actualResults);
+	
+	printf("Save the details (Y/N)?");
+	scanf("%c%c", &ans, &dump);
+	if(ans == 'y' || ans == 'Y'){
+		trans = trtUpdateDetails(conn, actualResults, choice);
+		if(!trans){
+			printf("\nError: Transaction Failed; Check database status...\n");
+		}
+		else{
+			printf("\nActual Results Updated!");
+		}
+		getch();
+	}
+	
+	//strcpy(querySelect, NULL);
+	//strcpy(actualResults, NULL);
+	//strcpy(queryCount, NULL);
+}
+
+int trtInsertDetails(MYSQL* conn, TestReport testReport){
+	string1000 insertQuery;
+	//strcpy(insertQuery, NULL);
+	
+	sprintf(insertQuery, "INSERT INTO %s(%s, %s, %s, %s, %s, %s) VALUES (%d, (SELECT %s FROM project WHERE %s = %d), '%s', '%s', '%s', '%s');",
+		TrtTable.tableName,
+		TrtTable.testNumber, TrtTable.userProjectId, TrtTable.testObjective,
+		TrtTable.testConditions, TrtTable.expectedResults, TrtTable.testDescription,
+		testReport.testNumber, TrtTable.userProjectId, TrtTable.userProjectId,
+		testReport.userProjectId, testReport.testObjective, testReport.testConditions,
+		testReport.expectedResults, testReport.testDescription);
+	
+	if(mysql_query(conn, insertQuery) != 0){
+		//strcpy(insertQuery, NULL);
+		return 0;
+	}
+	else {
+		//strcpy(insertQuery, NULL);
+		return 1;
+	}
+}
+
+void trtGetInput(MYSQL* conn, int userProjectId){
+	TestReport testReport;
+	string300 queryCount;
+	//strcpy(queryCount, NULL);
+	trtConcatString(queryCount, 6, userProjectId, 0);
+	printf("here1");
+	int entryCount = trtCountDetails(conn, queryCount);
+	int testNum = 1 + entryCount;
+	char ans, dump;
+	
+	CLEARSCR;
+	printf("Add Test Report\n\n");
+	testReport.testNumber = testNum;
+	printf("Test Number: %d\n", testReport.testNumber);
+	testReport.userProjectId = userProjectId;
+	printf("Test Objective: ");
+	gets(testReport.testObjective);
+	printf("Test Description: ");
+	gets(testReport.testDescription);
+	printf("Test Conditions: ");
+	gets(testReport.testConditions);
+	printf("Expected Results: ");
+	gets(testReport.expectedResults);
+	
+	printf("Save the details (Y/N)?");
+	scanf("%c", &ans);
+	if(ans == 'y' || ans == 'Y'){
+		int trans = trtInsertDetails(conn, testReport);
+		if(!trans){
+			printf("\nError: Transaction Failed; Check database status...\n");
+		}
+		else{
+			printf("\nReport Added!");
+		}
+	}
+	else{
+	}
+	//strcpy(queryCount, NULL);
+}
+
+void trtMenu(MYSQL* conn, int userProjectId){
+	int choice;
+	char dump;
+	
+	do{
+		CLEARSCR;
+		printf("Test Report Template\n\n");
+		printf("[1] Add Test Report\n");
+		printf("[2] Add Actual Results\n");
+		printf("[3] View Test Reports\n");
+		printf("[4] Back to Main\n\n");
+		printf("Choice: ");
+		scanf("%d%c", &choice, &dump);
+		
+		switch(choice){
+			case 1: trtGetInput(conn, userProjectId); break;
+			case 2: trtInputActualResults(conn, userProjectId); break;
+			case 3: trtDisplayAllReports(conn, userProjectId); break;
+			case 4: break;
+			default: printf("Invalid Input choices are 1,2,3, or 4 only...");break;
+		}
+	} while(choice != 4);
+}
+
+int trtTest(){
+	MYSQL* conn = dbConnectDefaultDatabase ("root", "p@ssword");
+	
+	int userProjectId = 1; //should be equal to the current project's userProjectId
+	
+	trtMenu(conn, userProjectId);
+	
+	dbDisconnectDatabase(conn);
+	fflush(stdin);
+	getchar();
+
+	return 0;
+}
+
 int main() {
-	return testMain();
+	//return testMain();
+	return trtTest();
 }
