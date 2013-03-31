@@ -1142,6 +1142,7 @@ int testMain () {
 /**TEST REPORT TEMPLATE**/
 
 typedef char string1000[1001];
+typedef char string800[801];
 typedef char string500[501];
 typedef char string300[301];
 typedef char string100[101];
@@ -1151,22 +1152,22 @@ typedef char string20[21];
 typedef struct{
 	int testNumber;
 	int userProjectId;
-	string300 testObjective;
-	string300 testConditions;
-	string300 expectedResults;
-	string300 actualResults;
-	string300 testDescription;
-}TestReport;
-
-struct trtTable {
-	string50 tableName;
-	string20 testNumber;
-	string20 userProjectId;
 	string500 testObjective;
 	string500 testConditions;
 	string500 expectedResults;
 	string500 actualResults;
 	string500 testDescription;
+}TestReport;
+
+struct trtTable {
+	string20 tableName;
+	string20 testNumber;
+	string20 userProjectId;
+	string20 testObjective;
+	string20 testConditions;
+	string20 expectedResults;
+	string20 actualResults;
+	string20 testDescription;
 };
 
 const struct trtTable TrtTable = {
@@ -1429,7 +1430,6 @@ void trtGetInput(MYSQL* conn, int userProjectId){
 	string300 queryCount;
 	//strcpy(queryCount, NULL);
 	trtConcatString(queryCount, 6, userProjectId, 0);
-	printf("here1");
 	int entryCount = trtCountDetails(conn, queryCount);
 	int testNum = 1 + entryCount;
 	char ans, dump;
@@ -1458,6 +1458,7 @@ void trtGetInput(MYSQL* conn, int userProjectId){
 		else{
 			printf("\nReport Added!");
 		}
+		getch();
 	}
 	else{
 	}
@@ -1483,7 +1484,7 @@ void trtMenu(MYSQL* conn, int userProjectId){
 			case 2: trtInputActualResults(conn, userProjectId); break;
 			case 3: trtDisplayAllReports(conn, userProjectId); break;
 			case 4: break;
-			default: printf("Invalid Input choices are 1,2,3, or 4 only...");break;
+			default: printf("Invalid Input - choices are 1,2,3, or 4 only...");break;
 		}
 	} while(choice != 4);
 }
@@ -1502,7 +1503,342 @@ int trtTest(){
 	return 0;
 }
 
+/**PROCESS IMPROVEMENT PLAN**/
+
+typedef struct{
+	int piplanId;
+	int userProjectId;
+	string800 notes;
+}ProcImpPlan;
+
+struct procImpPlanTable{
+	string20 tableName;
+	string20 piplanId;
+	string20 userProjectId;
+	string20 notes;
+};
+
+const struct procImpPlanTable ProcImpPlanTable = {
+	"piplan",
+	"piplan_id",
+	"user_project_id",
+	"notes"
+};
+
+typedef struct{
+	int problemId;
+	int piplanId;
+	string300 description;
+}ProcImpProb;
+
+struct procImpProbTable{
+	string20 tableName;
+	string20 problemId;
+	string20 piplanId;
+	string20 description;
+};
+
+const struct procImpProbTable ProcImpProbTable = {
+	"pipproblem",
+	"problem_id",
+	"piplan_id",
+	"description"
+};
+
+typedef struct{
+	int proposalId;
+	int piplanId;
+	string300 description;
+}ProcImpProp;
+
+struct procImpPropTable{
+	string20 tableName;
+	string20 proposalId;
+	string20 piplanId;
+	string20 description;
+};
+
+const struct procImpPropTable ProcImpPropTable = {
+	"pipproposal",
+	"proposal_id",
+	"piplan_id",
+	"description"
+};
+
+int pipCountDetails(MYSQL* conn, string300 query){
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+	int count = 0;
+	string300 countQuery;
+	
+	sprintf(countQuery, "%s", query);
+	if(mysql_query(conn, countQuery) != 0){
+		printf("Error: Count Query Failed.");
+	}
+	else{
+		result = mysql_store_result(conn);
+		if(result == NULL){
+			utilPrintError(conn, "No count produced.");
+		}
+		else{
+			while((row = mysql_fetch_row(result))){
+				count = atoi(row[0]);
+			}
+		}
+	}
+	
+	return count;
+}
+
+int pipUpdateDetails(MYSQL* conn, string800 notes, int piplanId){
+	string1000 updateQuery;
+	
+	sprintf(updateQuery, "UPDATE %s SET %s = '%s' WHERE %s = %d;",
+		ProcImpPlanTable.tableName,
+		ProcImpPlanTable.notes, notes,
+		ProcImpPlanTable.piplanId, piplanId);
+	if(mysql_query(conn, updateQuery) != 0){
+		return 0;
+	}
+	else {
+		return 1;
+	}
+}
+
+void pipSelectDetails(MYSQL* conn, int details, int piplanId){
+	string300 query;
+	switch(details){
+		case 1: strcpy(query, "SELECT problem_id, description FROM pipproblem WHERE piplan_id = "); 
+			break;
+		case 2: strcpy(query, "SELECT proposal_id, description FROM pipproposal WHERE piplan_id = "); 
+			break;
+		case 3: strcpy(query, "SELECT notes FROM piplan WHERE piplan_id = ");
+			break;
+	}
+	char pipId[11];
+	sprintf(pipId, "%d", piplanId);
+	strcat(query, pipId);
+	strcat(query, ";");
+	
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+	int num_fields;
+	int i;
+	string300 selectQuery;
+	
+	sprintf(selectQuery, "%s", query);
+	if(mysql_query(conn, selectQuery) != 0){
+		printf("Query failed \n");
+	}
+	else {
+		result = mysql_store_result(conn);
+		if(result == NULL){
+			utilPrintError(conn, "No matching results found.");
+		}
+		else {
+			num_fields = mysql_num_fields(result);
+			while((row = mysql_fetch_row(result))){
+				for(i = 0; i < num_fields; i++){
+					printf("%s           ", row[i] ? row[i] : "NULL");
+				}
+				printf("\n");
+			}
+		}
+	}
+}
+
+int pipInsertDetails(MYSQL* conn, int detail, int id, int piplanId, 
+	string300 description){
+	string1000 query;
+	switch(detail){
+		case 1: sprintf(query, "INSERT INTO %s VALUES (%d, (SELECT %s FROM %s WHERE %s = %d), '%s');", 
+			ProcImpProbTable.tableName, 
+			id, ProcImpProbTable.piplanId, ProcImpPlanTable.tableName, 
+			ProcImpProbTable.piplanId, piplanId, description); 
+			break;
+		case 2: sprintf(query, "INSERT INTO %s VALUES (%d, (SELECT %s FROM %s WHERE %s = %d), '%s');", 
+			ProcImpPropTable.tableName, 
+			id, ProcImpPropTable.piplanId, ProcImpPlanTable.tableName, 
+			ProcImpPropTable.piplanId, piplanId, description); 
+			break;
+		case 3: sprintf(query, "INSERT INTO %s(%s, %s) VALUES (%d, (SELECT %s FROM project WHERE %s = %d));", 
+			ProcImpPlanTable.tableName, 
+			ProcImpPlanTable.piplanId, ProcImpPlanTable.userProjectId, piplanId, 
+			ProcImpPlanTable.userProjectId, ProcImpPlanTable.userProjectId, id); 
+			break;
+	}
+	if(mysql_query(conn, query) != 0){
+		return 0;
+	}
+	else {
+		return 1;
+	}
+}
+
+void pipDisplayPlan(MYSQL* conn, int piplanId){
+	CLEARSCR;
+	printf("Process Improvement Plan\n\n");
+	printf("PIP Number  Problem Description\n");
+	pipSelectDetails(conn, 1, piplanId);
+	printf("\nProposal    Problem Description\nPIP Number\n");
+	pipSelectDetails(conn, 2, piplanId);
+	printf("\n\nNotes and Comments\n");
+	pipSelectDetails(conn, 3, piplanId);
+}
+
+void pipInputNotes(MYSQL* conn, ProcImpPlan procImpPlan){
+	char ans;
+	char dump;
+	printf("Done adding problem and proposal?\n");
+	printf("Do you wish to add notes and comments now?");
+	scanf("%c%c", &ans, &dump);
+	int trans;
+	
+	if(ans == 'y' || ans == 'Y'){
+		pipDisplayPlan(conn, procImpPlan.piplanId);
+		printf("\n\nNotes and Comments:\n");
+		gets(procImpPlan.notes);
+		printf("\n\nSave the details (Y/N)? ");
+		scanf("%c", &ans);
+		
+		if(ans == 'y' || ans == 'Y'){
+			trans = pipUpdateDetails(conn, procImpPlan.notes, 
+						procImpPlan.piplanId);
+			if(!trans){
+				printf("\nError: Transaction Failed; Check database status...\n");
+			}
+			else{
+				printf("Notes and Comments Added!");
+			}
+			getch();
+		}
+	}
+}
+
+pipInputProposal(MYSQL* conn, int piplanId){
+	char ans;
+	ProcImpProp procImpProp;
+	procImpProp.piplanId = piplanId;
+	pipDisplayPlan(conn, piplanId);
+	string300 query;
+	strcpy(query, "SELECT COUNT(*) FROM pipproposal WHERE piplan_id = ");
+	char projId[11];
+	sprintf(projId, "%d", piplanId);
+	strcat(query, projId);
+	strcat(query, ";");
+	procImpProp.proposalId = 1 + pipCountDetails(conn, query);
+	printf("\n\nProposal ID: %d\n", procImpProp.proposalId);
+	printf("Description\n");
+	gets(procImpProp.description);
+	printf("\n\nSave the details (Y/N)? ");
+	scanf("%c", &ans);
+	
+	if(ans == 'y' || ans == 'Y'){
+		int trans = pipInsertDetails(conn, 2, procImpProp.proposalId, 
+					procImpProp.piplanId, procImpProp.description);
+		if(!trans){
+			printf("\nError: Transaction Failed; Check database status...");
+		}
+		else{
+			printf("Proposal Added!");
+		}
+		getch();
+	}
+}
+
+void pipInputProblem(MYSQL* conn, int piplanId){
+	char ans;
+	ProcImpProb procImpProb;
+	procImpProb.piplanId = piplanId;
+	pipDisplayPlan(conn, piplanId);
+	string300 query;
+	strcpy(query, "SELECT COUNT(*) FROM pipproblem WHERE piplan_id=");
+	char projId[11];
+	sprintf(projId, "%d", piplanId);
+	strcat(query, projId);
+	strcat(query, ";");
+	procImpProb.problemId = 1 + pipCountDetails(conn, query);
+	printf("\n\nProblem ID: %d\n", procImpProb.problemId);
+	printf("Description\n");
+	gets(procImpProb.description);
+	printf("\n\nSave details (Y/N)? ");
+	scanf("%c", &ans);
+	
+	if(ans == 'y' || ans == 'Y'){
+		int trans = pipInsertDetails(conn, 1, procImpProb.problemId, 
+					procImpProb.piplanId, procImpProb.description);
+		if(!trans){
+			printf("\nError: Transaction Failed; Check database status...\n");
+		}
+		else{
+			printf("Problem Added!");
+		}
+		getch();
+	}
+}
+
+void pipMenu(MYSQL* conn, int userProjectId){
+	int choice;
+	char dump;
+	ProcImpPlan procImpPlan;
+	procImpPlan.userProjectId = userProjectId;
+	string300 queryCount;
+	strcpy(queryCount, "SELECT COUNT(*) FROM piplan WHERE user_project_id =");
+	char projId[11];
+	sprintf(projId, "%d", userProjectId);
+	strcat(queryCount, projId);
+	strcat(queryCount, ";");
+	int idExist = pipCountDetails(conn, queryCount);
+	if(idExist == 0){
+		string300 queryCountPipId;
+		strcpy(queryCountPipId, "SELECT COUNT(*) FROM piplan;");
+		procImpPlan.piplanId = 1 + pipCountDetails(conn, queryCountPipId);
+		string800 notes;
+		strcpy(notes, "Place Notes and Comments here...");
+		pipInsertDetails(conn, 3, procImpPlan.userProjectId, 
+			procImpPlan.piplanId, notes);
+	}
+	else{
+		procImpPlan.piplanId = idExist;
+	}
+	do{
+		CLEARSCR;
+		printf("Process Improvement Plan\n\n");
+		printf("[1] Add Problem\n");
+		printf("[2] Add Proposal \n");
+		printf("[3] Add Notes \n");
+		printf("[4] View Process Improvement Plan \n");
+		printf("[5] Go Back \n\n");
+		printf("Choice: ");
+		scanf("%d%c", &choice, &dump);
+		
+		switch(choice){
+			case 1: pipInputProblem(conn, procImpPlan.piplanId); break;
+			case 2: pipInputProposal(conn, procImpPlan.piplanId); break;
+			case 3: pipInputNotes(conn, procImpPlan); break;
+			case 4: pipDisplayPlan(conn, procImpPlan.piplanId); getch(); break;
+			case 5: break;
+			default: printf("Invalid Input, choices are 1, 2, 3, 4, or 5 only...");
+		}
+	}while(choice != 5);
+}
+
+int pipTest(){
+	MYSQL* conn = dbConnectDefaultDatabase("root", "p@ssword");
+	
+	int userProjectId = 1; // project.userProjectId
+
+	pipMenu(conn, userProjectId);
+	
+	dbDisconnectDatabase(conn);
+	fflush(stdin);
+	getchar();
+	
+	return 0;
+}
+
 int main() {
 	//return testMain();
-	return trtTest();
+	//return trtTest();
+	return pipTest(); 
 }
