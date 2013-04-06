@@ -10,6 +10,18 @@
 	#define CLEARSCR system("cls")
 #endif
 
+typedef char string1000[1001];
+typedef char string800[801];
+typedef char string500[501];
+typedef char string300[301];
+typedef char string150[151];
+typedef char string100[101];
+typedef char string50 [51];
+typedef char string40[41];
+typedef char string30[31];
+typedef char string20[21];
+typedef char string3[4];
+
 /**UTILITY FUNCTIONS**/
 void utilEscapeStringValue (char** stringValue) {
 	char* actualString = *stringValue;
@@ -1141,14 +1153,6 @@ int testMain () {
 
 /**TEST REPORT TEMPLATE**/
 
-typedef char string1000[1001];
-typedef char string800[801];
-typedef char string500[501];
-typedef char string300[301];
-typedef char string100[101];
-typedef char string50 [51];
-typedef char string20[21];
-
 typedef struct{
 	int testNumber;
 	int userProjectId;
@@ -1186,7 +1190,6 @@ int trtCountDetails(MYSQL* conn, string300 query){
 	MYSQL_ROW row;
 	int count = 0;
 	string300 countQuery;
-	//strcpy(countQuery, NULL);
 	
 	sprintf(countQuery, "%s", query);
 	if(mysql_query(conn, countQuery) != 0){
@@ -1203,21 +1206,15 @@ int trtCountDetails(MYSQL* conn, string300 query){
 			}
 		}
 	}
-	//strcpy(countQuery, NULL);
 	return count;
 }
 
 void trtConcatString(string300 query, int detail, int userProjectId, int testNum){
 	string100 query1;
-	//strcpy(query1, NULL);
 	string100 query2;
-	//strcpy(query2, NULL);
 	string100 query3;
-	//strcpy(query3, NULL);;
 	char projId[11];
-	//strcpy(projId, NULL);
 	char testNo[11];
-	//strcpy(testNo, NULL);
 	
 	sprintf(projId, "%d", userProjectId);
 	sprintf(testNo, "%d", testNum);
@@ -1256,12 +1253,6 @@ void trtConcatString(string300 query, int detail, int userProjectId, int testNum
 	}
 	strcat(query1, query3);
 	strcpy(query, query1);
-	
-	//strcpy(query1, NULL);
-	//strcpy(query2, NULL);
-	//strcpy(query3, NULL);
-	//strcpy(projId, NULL);
-	//strcpy(testNo, NULL);
 }
 
 void trtSelectDetails(MYSQL* conn, string300 query){
@@ -1270,7 +1261,6 @@ void trtSelectDetails(MYSQL* conn, string300 query){
 	int num_fields;
 	int i;
 	string300 selectQuery;
-	//strcpy(selectQuery, NULL);
 	
 	sprintf(selectQuery, "%s", query);
 	if(mysql_query(conn, selectQuery) != 0){
@@ -1291,12 +1281,10 @@ void trtSelectDetails(MYSQL* conn, string300 query){
 			}
 		}
 	}
-	//strcpy(selectQuery, NULL);
 }
 
 void trtDisplayReport(MYSQL* conn, int userProjectId, int testNum){
 	string300 query;
-	//strcpy(query, NULL);
 	
 	printf("Test Number: %d\n", testNum);
 	printf("Test Objective: ");
@@ -1311,13 +1299,10 @@ void trtDisplayReport(MYSQL* conn, int userProjectId, int testNum){
 	printf("Actual Results: ");
 	trtConcatString(query, 4, userProjectId, testNum);
 	trtSelectDetails(conn, query);
-	
-	//strcpy(query, NULL);	
 }
 
 void trtDisplayAllReports(MYSQL* conn, int userProjectId){
 	string300 queryCount;
-	//strcpy(queryCount, NULL);
 	trtConcatString(queryCount, 6, userProjectId, 0);
 	int entryCount = trtCountDetails(conn, queryCount);
 	
@@ -1329,38 +1314,31 @@ void trtDisplayAllReports(MYSQL* conn, int userProjectId){
 		printf("\n");
 	}
 	getch();
-	//strcpy(queryCount, NULL);
 }
 
 int trtUpdateDetails(MYSQL* conn, string500 actualResults, int testNum){
 	string300 updateQuery;
-	//strcpy(updateQuery, NULL);
 	
 	sprintf(updateQuery, "UPDATE %s SET %s='%s' WHERE %s = %d",
 		TrtTable.tableName,
 		TrtTable.actualResults, actualResults,
 		TrtTable.testNumber, testNum);
 	if(mysql_query(conn, updateQuery) != 0){
-		//strcpy(updateQuery, NULL);
 		return 0;
 	}
 	else {
-		//strcpy(updateQuery, NULL);
 		return 1;
 	}
 }
 
 void trtInputActualResults(MYSQL* conn, int userProjectId){
 	string300 querySelect;
-	//strcpy(querySelect, NULL);
 	strcpy(querySelect, "SELECT test_number, test_description FROM testreport WHERE actual_results IS NULL;");
 	int choice;
 	int trans;
 	string500 actualResults;
-	//strcpy(actualResults, NULL);
 	int entryCount;
 	string300 queryCount;
-	//strcpy(queryCount, NULL);	
 	char ans, dump;
 	
 	do{
@@ -1397,15 +1375,10 @@ void trtInputActualResults(MYSQL* conn, int userProjectId){
 		}
 		getch();
 	}
-	
-	//strcpy(querySelect, NULL);
-	//strcpy(actualResults, NULL);
-	//strcpy(queryCount, NULL);
 }
 
 int trtInsertDetails(MYSQL* conn, TestReport testReport){
 	string1000 insertQuery;
-	//strcpy(insertQuery, NULL);
 	
 	sprintf(insertQuery, "INSERT INTO %s(%s, %s, %s, %s, %s, %s) VALUES (%d, (SELECT %s FROM project WHERE %s = %d), '%s', '%s', '%s', '%s');",
 		TrtTable.tableName,
@@ -1416,11 +1389,9 @@ int trtInsertDetails(MYSQL* conn, TestReport testReport){
 		testReport.expectedResults, testReport.testDescription);
 	
 	if(mysql_query(conn, insertQuery) != 0){
-		//strcpy(insertQuery, NULL);
 		return 0;
 	}
 	else {
-		//strcpy(insertQuery, NULL);
 		return 1;
 	}
 }
@@ -1428,7 +1399,6 @@ int trtInsertDetails(MYSQL* conn, TestReport testReport){
 void trtGetInput(MYSQL* conn, int userProjectId){
 	TestReport testReport;
 	string300 queryCount;
-	//strcpy(queryCount, NULL);
 	trtConcatString(queryCount, 6, userProjectId, 0);
 	int entryCount = trtCountDetails(conn, queryCount);
 	int testNum = 1 + entryCount;
@@ -1462,7 +1432,6 @@ void trtGetInput(MYSQL* conn, int userProjectId){
 	}
 	else{
 	}
-	//strcpy(queryCount, NULL);
 }
 
 void trtMenu(MYSQL* conn, int userProjectId){
@@ -1474,8 +1443,8 @@ void trtMenu(MYSQL* conn, int userProjectId){
 		printf("Test Report Template\n\n");
 		printf("[1] Add Test Report\n");
 		printf("[2] Add Actual Results\n");
-		printf("[3] View Test Reports\n");
-		printf("[4] Back to Main\n\n");
+		printf("[3] View Test Reports\n\n");
+		printf("[0] Go Back\n\n");
 		printf("Choice: ");
 		scanf("%d%c", &choice, &dump);
 		
@@ -1483,24 +1452,10 @@ void trtMenu(MYSQL* conn, int userProjectId){
 			case 1: trtGetInput(conn, userProjectId); break;
 			case 2: trtInputActualResults(conn, userProjectId); break;
 			case 3: trtDisplayAllReports(conn, userProjectId); break;
-			case 4: break;
+			case 0: /*BACK to*/break;
 			default: printf("Invalid Input - choices are 1,2,3, or 4 only...");break;
 		}
 	} while(choice != 4);
-}
-
-int trtTest(){
-	MYSQL* conn = dbConnectDefaultDatabase ("root", "p@ssword");
-	
-	int userProjectId = 1; //should be equal to the current project's userProjectId
-	
-	trtMenu(conn, userProjectId);
-	
-	dbDisconnectDatabase(conn);
-	fflush(stdin);
-	getchar();
-
-	return 0;
 }
 
 /**PROCESS IMPROVEMENT PLAN**/
@@ -1807,8 +1762,8 @@ void pipMenu(MYSQL* conn, int userProjectId){
 		printf("[1] Add Problem\n");
 		printf("[2] Add Proposal \n");
 		printf("[3] Add Notes \n");
-		printf("[4] View Process Improvement Plan \n");
-		printf("[5] Go Back \n\n");
+		printf("[4] View Process Improvement Plan \n\n");
+		printf("[0] Go Back \n\n");
 		printf("Choice: ");
 		scanf("%d%c", &choice, &dump);
 		
@@ -1817,28 +1772,504 @@ void pipMenu(MYSQL* conn, int userProjectId){
 			case 2: pipInputProposal(conn, procImpPlan.piplanId); break;
 			case 3: pipInputNotes(conn, procImpPlan); break;
 			case 4: pipDisplayPlan(conn, procImpPlan.piplanId); getch(); break;
-			case 5: break;
+			case 0: /*BACK to*/break;
 			default: printf("Invalid Input, choices are 1, 2, 3, 4, or 5 only...");
 		}
 	}while(choice != 5);
 }
 
-int pipTest(){
+/**USER SECTION MODULE**/
+
+struct usmUserAccountStruct
+{
+  string40 usmUserName;
+  string20 usmPassword;
+  string3 usmSection;
+};
+
+typedef struct usmUserAccountStruct usmUserAccount;
+
+void usmLogin(MYSQL* conn);
+void usmSignUp(MYSQL* conn);
+void usmInputPassword(string20 usmPassword);
+void usmInsertUser(MYSQL* conn, usmUserAccount usmAccount);
+int usmDataExists(MYSQL* conn, char * basis, char * basis_column, char * basis_table);
+int usmVerifyAccount(MYSQL* conn, usmUserAccount usmLoginDetails);
+void usmChooseSections(MYSQL* conn, string3 usmSectionTemp);
+void pmGenerateProjects(MYSQL *conn, string40 userName);
+void pmViewProjects(MYSQL *conn, string40 usmUserName);
+void pmSetProjectDone(MYSQL* conn, string40 userName, int pspNum); //TO USE
+void uiSectionManagement(MYSQL* conn); 
+
+void usmLogin(MYSQL* conn){
+  char usmInput = ' ';
+  int usmLength = 0;
+  usmUserAccount usmLoginDetails;
+  system("cls");
+  printf("Log In\n\n");
+  printf("User name: ");
+  scanf("%s", &usmLoginDetails.usmUserName);
+  printf("Password: ");
+  usmInputPassword(usmLoginDetails.usmPassword);
+  printf("\n%s,%s\n", usmLoginDetails.usmUserName, usmLoginDetails.usmPassword);
+  if(usmVerifyAccount(conn, usmLoginDetails)){
+     printf("\nAccess Granted");
+     pmViewProjects(conn, usmLoginDetails.usmUserName);
+  }else{
+   printf("Access Error");
+   getch();
+   uiDisplayMain();
+  }
+  getch();
+}
+
+void usmSignup(MYSQL* conn){
+  char usmInput = ' ';
+  int usmLength = 0;
+  string20 usmCreatedPassword;
+  string20 usmConfirmedPassword;
+  usmUserAccount usmLoginDetails;
+  system("cls");
+  printf("Sign Up");
+  printf("\nUser name: ");
+  scanf("%s", &usmLoginDetails.usmUserName);
+  do{
+    printf("\nCreate Password: ");
+    usmInputPassword(usmCreatedPassword);
+    printf("\nConfirm Password: ");
+    usmInputPassword(usmConfirmedPassword);
+    if(strcmp(usmCreatedPassword, usmConfirmedPassword))
+      printf("\nPassword do not match");
+  }while(strcmp(usmCreatedPassword, usmConfirmedPassword));
+  strcpy(usmLoginDetails.usmPassword, usmCreatedPassword);
+  string3 usmSectionTemp;
+  
+  printf("\n\nSection: ");
+  usmChooseSections(conn, usmSectionTemp);
+  strcpy(usmLoginDetails.usmSection, usmSectionTemp);
+  if(usmDataExists(conn, usmLoginDetails.usmUserName, "user_name", "user")){
+   printf("\nUsername already exists. Choose a new one...");
+   getch();
+   uiDisplayMain();
+  }else{
+   usmInsertUser(conn,usmLoginDetails);
+   printf("Sign-up success!");
+   getch();
+   pmViewProjects(conn, usmLoginDetails.usmUserName);
+  }
+}
+
+void usmInputPassword(string20 usmPassword){
+  strcpy(usmPassword," ");
+  char usmInput = ' ';
+  int usmLength = 0;
+  do
+  {     usmInput = getch();  
+        if(usmInput != 13 && usmInput != 8 && usmLength < 20 && usmLength >= 0)
+        {  usmPassword[usmLength] = usmInput;
+           printf("*");
+           usmLength++;
+        }
+        else if(usmInput == 8 && usmLength > 0)
+        {  printf("\b"); 
+           printf(" "); 
+           printf("\b");
+           usmPassword[usmLength] = '\0';
+           usmLength--;
+        }
+  }while(usmInput != 13);
+  for(usmLength = usmLength; usmLength < 20; usmLength++){
+    usmPassword[usmLength] = '\0';
+  }
+}
+
+void usmInsertUser(MYSQL* conn, usmUserAccount usmAccount){
+  string500 usmQuery;
+  sprintf(usmQuery, "insert into user(user_name, password, section_id) values ('%s','%s',(select section_id from section where section_name = '%s'));", 
+  usmAccount.usmUserName,usmAccount.usmPassword,usmAccount.usmSection);
+  mysql_query(conn,usmQuery);
+  pmGenerateProjects(conn, usmAccount.usmUserName);
+}
+
+int usmDataExists(MYSQL* conn, char * basis, char * basis_column, char * basis_table){
+  int usmExisted = 0;
+  MYSQL_RES *res;
+  MYSQL_ROW row;
+  string500 usmQuery;
+  sprintf(usmQuery, "select %s from %s;", basis_column, basis_table);
+  mysql_query(conn,usmQuery); 
+  res = mysql_use_result(conn);
+  
+  while((row = mysql_fetch_row(res)) != NULL){
+    if(!strcmp(row[0],basis)){
+      usmExisted = 1;
+    }
+  }
+  return usmExisted;
+} 
+void usmChooseSections(MYSQL* conn, string3 usmSectionTemp){
+  int usmLogInValid = 0;
+  MYSQL_RES *res;
+  MYSQL_ROW row;
+  string3 usmSections[100];
+  string500 usmQuery;
+  sprintf(usmQuery, "select section_name from section;");
+  mysql_query(conn,usmQuery); 
+  res = mysql_use_result(conn);
+  int i = 0;
+  int usmInput;
+  while((row = mysql_fetch_row(res)) != NULL){
+    i++;
+    printf("\n[%d] %s", i, row[0]);
+    strcpy(usmSections[i-1],row[0]);
+  }
+  do{ 
+	  printf("\n\nEnter section: ");                                  
+	  scanf("%d",&usmInput);
+	  if(usmInput<1 || usmInput>i){
+	  printf("Sorry, invalid index...");
+	  getch();
+	  }
+  }while(usmInput<1 || usmInput>i);
+  strcpy(usmSectionTemp,usmSections[usmInput-1]);  
+}
+
+int usmVerifyAccount(MYSQL* conn, usmUserAccount usmAccount){
+  int usmLogInValid = 0;
+  MYSQL_RES *res;
+  MYSQL_ROW row;
+  
+  string500 usmQuery;
+  sprintf(usmQuery, "select * from user where user_name = '%s' and password = '%s';", 
+  usmAccount.usmUserName,usmAccount.usmPassword);
+  mysql_query(conn,usmQuery); 
+  res = mysql_use_result(conn);
+  
+  while((row = mysql_fetch_row(res)) != NULL){
+      usmLogInValid = 1;
+  }
+  return usmLogInValid;  
+}
+
+struct usmSectionStruct
+{
+  string3 usmSectionName;
+  string40 usmProfessor;
+};
+
+typedef struct usmSectionStruct usmSection;
+
+void usmInsertSection(MYSQL* conn, usmSection usmSec);
+
+void usmAddSection(MYSQL *conn){
+  usmSection usmSectionDetails;
+  system("cls");
+  printf("Add Section\n");
+  printf("Section Name (3 chars. max):");
+  scanf("%3s", usmSectionDetails.usmSectionName);
+  fflush(stdin) ;
+  printf("Professor Name (40 chars. max):");
+  scanf("%[^\n]", usmSectionDetails.usmProfessor);
+  if(usmDataExists(conn,usmSectionDetails.usmSectionName, "section_name", "section")){
+    printf("\nSorry, %s already exists...\n", usmSectionDetails.usmSectionName);
+    getch();
+    uiSectionManagement(conn);
+  }else{
+    usmInsertSection(conn, usmSectionDetails);
+    printf("Section Added! Succesful! ");
+    getch();
+    uiSectionManagement(conn);
+  } 
+}
+
+void usmInsertSection(MYSQL* conn, usmSection usmSec){
+  string500 usmQuery;
+  sprintf(usmQuery, "insert into section(section_name, professor_name) values ('%s','%s');", 
+  usmSec.usmSectionName,usmSec.usmProfessor);
+  mysql_query(conn,usmQuery);
+}
+
+void usmUpdateSection(MYSQL* conn, usmSection usmSec, string30 usmSectionOrig){
+  string500 usmQuery;
+  sprintf(usmQuery, "update section set section_name = '%s', professor_name = '%s' where section_name = '%s';", 
+  usmSec.usmSectionName,usmSec.usmProfessor, usmSectionOrig);
+  mysql_query(conn,usmQuery);
+}
+
+void usmEditSection(MYSQL* conn){
+  usmSection usmSectionDetails;
+  system("cls");
+  printf("Edit Section");
+  printf("\nChoose Section:");
+  string3 usmSectionName;
+  usmChooseSections(conn, usmSectionName);
+  system("cls");
+  printf("Editing: %s", usmSectionName);
+  printf("\nSection Name (3 chars. max):");
+  scanf("%s", usmSectionDetails.usmSectionName);
+  fflush(stdin) ;
+  printf("Professor Name (40 chars. max):");
+  scanf("%[^\n]", usmSectionDetails.usmProfessor);
+  if(strcmp(usmSectionName,usmSectionDetails.usmSectionName) && usmDataExists(conn,usmSectionDetails.usmSectionName, "section_name", "section")){
+    printf("\nSorry, %s already exists", usmSectionDetails.usmSectionName);
+    getch();
+    uiSectionManagement(conn);
+  }else{
+    usmUpdateSection(conn, usmSectionDetails, usmSectionName);
+    printf("\nSection Updated! Succesful! ");
+    getch();
+    uiSectionManagement(conn);
+  } 
+}
+
+void usmViewSection(MYSQL* conn){
+  MYSQL_RES *res;
+  MYSQL_ROW row;
+  string500 usmQuery;
+  sprintf(usmQuery, "select * from section;");
+  mysql_query(conn,usmQuery); 
+  res = mysql_use_result(conn);
+  int usmInput;
+  system("cls");
+  printf("\nSection Name\tProfessor");
+  while((row = mysql_fetch_row(res)) != NULL){
+    printf("\n%s\t\t%s", row[1], row[2]);
+  }
+  
+  getch();
+  uiSectionManagement(conn);
+}
+
+/**PROJECT MANAGEMENT MODULE**/
+
+void pmGenerateProjects(MYSQL *conn, string40 userName){
+  string500 usmQuery;
+  int i;
+  for(i = 1; i <= 5; i++){
+    sprintf(usmQuery, "insert into project(user_id, psp_id,current_phase,done) values ((select user_id from user where user_name = '%s'),%d, (select phase_id from phase where phase_name = 'None'),0);", 
+    userName,i);
+    mysql_query(conn,usmQuery);
+  }  
+}
+
+void pmViewProjectDetails(MYSQL_RES *res){
+  int projectStatus[5]; 
+  MYSQL_ROW row;
+  system("cls");
+  int done = 1;
+  int current = 0;
+  int idle = 0;
+  int projNum = 1;
+  int curr = 0;
+  int pmInput;
+  fflush(stdin);
+  int x = 0;
+  while((row = mysql_fetch_row(res)) != NULL){
+    projectStatus[x] = atoi(row[4]);
+    x++;
+  }
+  
+  do{
+	  	done=1;
+	  	curr = 0;
+	  	CLEARSCR;
+	  	printf("Personal Software Process\n\n");
+	  	for(projNum = 1; projNum < 6; projNum++){
+	  		
+	    	if(projectStatus[projNum - 1] == 0 && done){
+	      		done = 0;
+	      		current = 1;
+	    	}else if(projectStatus[projNum - 1] == 0 && current){
+	      		current = 0;
+	      		idle = 1;
+	    	}
+	    	
+		    if(done){
+		      printf("Project %d - done\n", projNum);
+		    }else if(current){
+		      curr = projNum;
+		      printf("Project %d - current\n", projNum);
+		    }else if(idle){
+		      printf("Project %d - not yet started\n", projNum);
+		    }
+	  	}
+	
+	  
+		printf("\n[1] View Done Projects\n");
+		  
+		if(!curr){
+			printf("\nYou are currently done with everything!");
+		}
+		else{
+		  	printf("[2] Continue project %d", curr);
+		}
+		printf("\n\n[0] Go Back");
+		printf("\n\nchoice: ");
+		scanf("%d", &pmInput);
+		fflush(stdin);
+	
+		if(pmInput == 2){
+			uiDisplayMain();//GO to current project KEVIN
+		}
+		else if(pmInput == 1){
+		    uiDisplayMain();//CALL uiViewForms(); BERNA
+		}
+		else if(pmInput == 0){
+			
+		}  
+		else{
+			printf("Invalid Input, choices are 0, 1, or 2 only...");
+		  	getch();
+		}
+	}while(pmInput != 0);
+	  
+	if(pmInput == 0){
+	  	uiDisplayMain();
+	}
+}
+
+void pmViewProjects(MYSQL *conn, string40 usmUserName){
+  MYSQL_RES *res;
+  string500 usmQuery;
+  sprintf(usmQuery, "select * from project where user_id = (select user_id from user where user_name = '%s');", usmUserName);
+  mysql_query(conn,usmQuery); 
+  res = mysql_use_result(conn);
+  pmViewProjectDetails(res);
+}
+
+
+void pmSetProjectDone(MYSQL* conn, string40 userName, int pspNum){
+  string500 usmQuery;
+  sprintf(usmQuery, "update project set done = 1 where user_id = (select user_id from user where user_name = '%s') and psp_id = %d;", 
+  userName, pspNum);
+  mysql_query(conn,usmQuery);
+}
+
+/**UI MODULE**/
+void uiViewForms(){
+	int choice;
+	do{
+		//LIST OF PROJECTS WHICH IS DONE ALREADY...
+		//CHOOSE FROM LIST before the following:
+		CLEARSCR();
+		printf("PSP Forms:");
+		printf("[1] Project Plan Summary\n");
+		printf("[2] Size Estimating Template\n");
+		printf("[3] Task Planning Template\n");
+		printf("[4] Schedule Planning Template\n");
+		printf("[5] Test Report Template\n");
+		printf("[6] Process Improvement Plan\n\n");
+		printf("[0] Go Back\n\n");
+		printf("Which form do you want to view? ");
+		scanf("&d", &choice);
+		
+		if(choice == 1){
+			//VIEW PROJECT PLAN SUMMARY ALLEN
+		}
+		else if(choice == 2){
+			//VIEW SIZE ESTIMATING TEMPLATE ALLEN
+		}
+		else if(choice == 3){
+			//VIEW TASK PLANNING TEMPLATE KEVIN
+		}
+		else if(choice == 4){
+			//VIEW SCHEDULE PLANNING TEMPLATE ALLEN
+		}
+		else if(choice == 5){
+			//VIEW TESTREPORT TEMPLATE BERNA - trtDisplayAllReports(conn, userProjectId);
+		}
+		else if(choice == 6){
+			//VIEW PROCESS IMPROVEMENT PLAN BERNA - pipDisplayPlan(conn, procImpPlan.piplanId);
+		}
+		else if(choice == 0){
+			
+		}
+		else{
+			printf("\nInvalid input, choose from the choices above only...");
+			getch();
+		}
+	}while(choice < 0 || choice > 6); //CHECK max choice if 6
+}
+
+void uiSectionManagement(MYSQL* conn){
+	int choice;
+	
+	do{	
+		CLEARSCR;
+		printf("SECTION MANAGEMENT\n\n");
+		printf("[1] Add Section\n");
+		printf("[2] Edit Section\n");
+		printf("[3] View Section\n\n");
+		
+		printf("[0] Go Back\n\n");
+		
+		printf("choice: ");
+		scanf("%d", &choice);
+		
+		if(choice == 1){
+			usmAddSection(conn);
+		}
+		else if(choice == 2){
+			usmEditSection(conn);
+		}
+		else if(choice == 3){
+			usmViewSection(conn);
+		}
+		else if(choice == 0){
+			uiDisplayMain();
+		}
+		else{
+			printf("\n\nInvalid input...");
+			getch();
+		}
+	}while(choice != 0 && choice != 1 && choice != 2 && choice != 3);
+}
+
+int uiDisplayMain(){
+	int choice;
+	
 	MYSQL* conn = dbConnectDefaultDatabase("root", "p@ssword");
 	
-	int userProjectId = 1; // project.userProjectId
-
-	pipMenu(conn, userProjectId);
+	do{
+		CLEARSCR;
+		printf("|-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-|\n");
+		printf("- AUTOMATED PERSONAL SOFTWARE PROCESS -\n");
+		printf("|-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-|\n");
+		printf("	[1] Login\n");
+		printf("	[2] Signup\n");
+		printf("	[3] Section Management\n\n");
+		
+		printf("	[0] Exit\n\n");
+		
+		printf("	choice: ");
+		scanf("%d", &choice);
+		
+		if(choice == 1){
+			usmLogin(conn);
+		}
+		else if(choice == 2){
+			usmSignup(conn);
+		}
+		else if(choice == 3){
+			uiSectionManagement(conn);
+		}
+		else if(choice == 0){
+		}
+		else{
+			printf("\n\nInvalid input...");
+			getch();
+		}
+	}while(choice != 0 && choice != 1 && choice != 2 && choice != 3);
 	
 	dbDisconnectDatabase(conn);
 	fflush(stdin);
-	getchar();
-	
 	return 0;
 }
 
 int main() {
 	//return testMain();
-	//return trtTest();
-	return pipTest(); 
+	//TRT: trtMenu(conn, userProjectId);
+	//PIP: pipMenu(conn, userProjectId);
+	
+	return uiDisplayMain(); 
 }

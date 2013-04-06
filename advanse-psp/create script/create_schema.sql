@@ -1,6 +1,6 @@
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 
 DROP SCHEMA IF EXISTS `advanse` ;
 CREATE SCHEMA IF NOT EXISTS `advanse` DEFAULT CHARACTER SET latin1 ;
@@ -16,7 +16,7 @@ CREATE  TABLE IF NOT EXISTS `advanse`.`phase` (
   `phase_name` VARCHAR(50) NOT NULL ,
   PRIMARY KEY (`phase_id`) )
 ENGINE = InnoDB
-AUTO_INCREMENT = 7
+AUTO_INCREMENT = 8
 DEFAULT CHARACTER SET = latin1;
 
 
@@ -31,6 +31,7 @@ CREATE  TABLE IF NOT EXISTS `advanse`.`section` (
   `professor_name` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`section_id`) )
 ENGINE = InnoDB
+AUTO_INCREMENT = 4
 DEFAULT CHARACTER SET = latin1;
 
 
@@ -52,6 +53,7 @@ CREATE  TABLE IF NOT EXISTS `advanse`.`user` (
     ON DELETE SET NULL
     ON UPDATE CASCADE)
 ENGINE = InnoDB
+AUTO_INCREMENT = 32
 DEFAULT CHARACTER SET = latin1;
 
 
@@ -79,6 +81,7 @@ CREATE  TABLE IF NOT EXISTS `advanse`.`project` (
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB
+AUTO_INCREMENT = 39
 DEFAULT CHARACTER SET = latin1;
 
 
@@ -177,7 +180,6 @@ CREATE  TABLE IF NOT EXISTS `advanse`.`objectsize` (
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-AUTO_INCREMENT = 31
 DEFAULT CHARACTER SET = latin1;
 
 
@@ -250,8 +252,8 @@ DROP TABLE IF EXISTS `advanse`.`defect` ;
 CREATE  TABLE IF NOT EXISTS `advanse`.`defect` (
   `defect_id` INT(11) NOT NULL AUTO_INCREMENT ,
   `user_project_id` INT(11) NOT NULL ,
-  `inject_phase` INT(11) NOT NULL ,
-  `fix_phase` INT(11) NOT NULL ,
+  `inject_phase` INT(11) NULL DEFAULT NULL ,
+  `fix_phase` INT(11) NULL DEFAULT NULL ,
   `start_fix_time` BIGINT(20) NOT NULL ,
   `end_fix_time` BIGINT(20) NOT NULL ,
   `description` TEXT NULL DEFAULT NULL ,
@@ -260,14 +262,14 @@ CREATE  TABLE IF NOT EXISTS `advanse`.`defect` (
   INDEX `user_project_defect_fk` (`user_project_id` ASC) ,
   INDEX `inject_phase_defect_fk` (`inject_phase` ASC) ,
   INDEX `defect_type_fk` (`type_id` ASC) ,
-  CONSTRAINT `defect_type_fk`
-    FOREIGN KEY (`type_id` )
-    REFERENCES `advanse`.`defecttype` (`type_id` )
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
   CONSTRAINT `inject_phase_defect_fk`
     FOREIGN KEY (`inject_phase` )
     REFERENCES `advanse`.`phase` (`phase_id` )
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `defect_type_fk`
+    FOREIGN KEY (`type_id` )
+    REFERENCES `advanse`.`defecttype` (`type_id` )
     ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `user_project_defect_fk`
@@ -422,6 +424,7 @@ CREATE  TABLE IF NOT EXISTS `advanse`.`piplan` (
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB
+AUTO_INCREMENT = 6
 DEFAULT CHARACTER SET = latin1;
 
 
@@ -431,10 +434,10 @@ DEFAULT CHARACTER SET = latin1;
 DROP TABLE IF EXISTS `advanse`.`pipproblem` ;
 
 CREATE  TABLE IF NOT EXISTS `advanse`.`pipproblem` (
-  `problem_id` INT(11) NOT NULL AUTO_INCREMENT ,
+  `problem_id` INT(11) NOT NULL ,
   `piplan_id` INT(11) NOT NULL ,
   `description` TEXT NULL DEFAULT NULL ,
-  PRIMARY KEY (`problem_id`) ,
+  PRIMARY KEY (`problem_id`, `piplan_id`) ,
   INDEX `piplan_pipproblem_fk` (`piplan_id` ASC) ,
   CONSTRAINT `piplan_pipproblem_fk`
     FOREIGN KEY (`piplan_id` )
@@ -451,10 +454,10 @@ DEFAULT CHARACTER SET = latin1;
 DROP TABLE IF EXISTS `advanse`.`pipproposal` ;
 
 CREATE  TABLE IF NOT EXISTS `advanse`.`pipproposal` (
-  `proposal_id` INT(11) NOT NULL AUTO_INCREMENT ,
+  `proposal_id` INT(11) NOT NULL ,
   `piplan_id` INT(11) NOT NULL ,
   `description` TEXT NULL DEFAULT NULL ,
-  PRIMARY KEY (`proposal_id`) ,
+  PRIMARY KEY (`proposal_id`, `piplan_id`) ,
   INDEX `piplan_proposal_fk` (`piplan_id` ASC) ,
   CONSTRAINT `piplan_proposal_fk`
     FOREIGN KEY (`piplan_id` )
@@ -589,7 +592,8 @@ CREATE  TABLE IF NOT EXISTS `advanse`.`taskplanentry` (
   `taskplan_id` INT(11) NOT NULL ,
   `phase_id` INT(11) NOT NULL ,
   `date_planned` BIGINT(20) NOT NULL ,
-  `date_accomplished` BIGINT(20) NOT NULL ,
+  `date_accomplished` BIGINT(20) NOT NULL DEFAULT '0' ,
+  `taskplanentrycol` VARCHAR(45) NULL DEFAULT '0' ,
   PRIMARY KEY (`entry_id`) ,
   INDEX `taskplan_entry_fk` (`taskplan_id` ASC) ,
   INDEX `phase_entry_fk` (`phase_id` ASC) ,
@@ -613,13 +617,14 @@ DEFAULT CHARACTER SET = latin1;
 DROP TABLE IF EXISTS `advanse`.`testreport` ;
 
 CREATE  TABLE IF NOT EXISTS `advanse`.`testreport` (
-  `test_number` INT(11) NOT NULL AUTO_INCREMENT ,
+  `test_number` INT(11) NOT NULL ,
   `user_project_id` INT(11) NOT NULL ,
   `test_objective` TEXT NULL DEFAULT NULL ,
   `test_conditions` TEXT NULL DEFAULT NULL ,
   `expected_results` TEXT NULL DEFAULT NULL ,
   `actual_results` TEXT NULL DEFAULT NULL ,
-  PRIMARY KEY (`test_number`) ,
+  `test_description` TEXT NULL DEFAULT NULL ,
+  PRIMARY KEY (`test_number`, `user_project_id`) ,
   INDEX `user_project_testreport_fk` (`user_project_id` ASC) ,
   CONSTRAINT `user_project_testreport_fk`
     FOREIGN KEY (`user_project_id` )
@@ -629,6 +634,7 @@ CREATE  TABLE IF NOT EXISTS `advanse`.`testreport` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = latin1;
 
+USE `advanse` ;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
